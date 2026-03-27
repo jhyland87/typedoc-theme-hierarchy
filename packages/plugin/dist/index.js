@@ -222,10 +222,19 @@ var OverrideTheme = class extends DefaultTheme {
   constructor(renderer) {
     super(renderer);
     this.owner.on(RendererEvent.END, (event) => {
-      fse.copySync(
-        path2.join(__dirname, `assets`),
-        path2.join(event.outputDirectory, `assets`)
-      );
+      const src = path2.join(__dirname, `assets`);
+      const dest = path2.join(event.outputDirectory, `assets`);
+      try {
+        console.log(`[hierarchy-theme] Copying assets from ${src} to ${dest}`);
+        console.log(`[hierarchy-theme] Source exists: ${fse.existsSync(src)}`);
+        if (fse.existsSync(src)) {
+          console.log(`[hierarchy-theme] Source contents: ${fse.readdirSync(src).join(", ")}`);
+        }
+        fse.copySync(src, dest);
+        console.log(`[hierarchy-theme] Assets copied successfully`);
+      } catch (err) {
+        console.error(`[hierarchy-theme] Failed to copy assets:`, err);
+      }
     });
   }
   getRenderContext(page) {

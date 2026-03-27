@@ -252,10 +252,19 @@ var OverrideTheme = class extends import_typedoc3.DefaultTheme {
   constructor(renderer) {
     super(renderer);
     this.owner.on(import_typedoc3.RendererEvent.END, (event) => {
-      import_fs_extra.default.copySync(
-        import_path2.default.join(__dirname, `assets`),
-        import_path2.default.join(event.outputDirectory, `assets`)
-      );
+      const src = import_path2.default.join(__dirname, `assets`);
+      const dest = import_path2.default.join(event.outputDirectory, `assets`);
+      try {
+        console.log(`[hierarchy-theme] Copying assets from ${src} to ${dest}`);
+        console.log(`[hierarchy-theme] Source exists: ${import_fs_extra.default.existsSync(src)}`);
+        if (import_fs_extra.default.existsSync(src)) {
+          console.log(`[hierarchy-theme] Source contents: ${import_fs_extra.default.readdirSync(src).join(", ")}`);
+        }
+        import_fs_extra.default.copySync(src, dest);
+        console.log(`[hierarchy-theme] Assets copied successfully`);
+      } catch (err) {
+        console.error(`[hierarchy-theme] Failed to copy assets:`, err);
+      }
     });
   }
   getRenderContext(page) {
