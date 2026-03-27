@@ -217,8 +217,8 @@ const Navigation = ({
 		<ul class='js-category-list category' data-id={id}>
 			{docTree && (
 				<li>
-					<span class='js-category-title category__title' data-id='docs-section'>
-						<div class='category__folder' data-id='docs-section' />
+					<span class='js-category-title category__title' data-id='docs-root'>
+						<div class='category__folder' data-id='docs-root' />
 						Documents
 					</span>
 					<DocCategoryNavigation {...docTree} context={context} />
