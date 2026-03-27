@@ -3,6 +3,7 @@ import * as process from 'process';
 import {
 	type DeclarationReflection,
 	type DefaultThemeRenderContext,
+	type DocumentReflection,
 	JSX,
 	type PageEvent,
 	type Reflection,
@@ -31,10 +32,18 @@ interface ICategory {
 	categories: Record<string, ICategory>;
 }
 
+interface IDocCategory {
+	id: string;
+	items: DocumentReflection[];
+	categories: Record<string, IDocCategory>;
+}
+
 export const navigation =
 	(context: OverrideThemeContext) =>
 	(props: PageEvent<Reflection>): JSX.Element => {
 		const categories = formatFileHierarchy(props.model.project.children || []);
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const documents: DocumentReflection[] | undefined = (props.model.project as any).documents;
 
 		return (
 			<div class='tree'>
@@ -75,18 +84,72 @@ export const navigation =
 					</button>
 				</div>
 				<div class='tree-content'>
-					<Navigation {...categories} context={context} />
+					<Navigation {...categories} documents={documents} context={context} />
 				</div>
 			</div>
 		);
 	};
 
-const Navigation = ({
+const formatDocumentHierarchy = (documents: DocumentReflection[]): IDocCategory => {
+	const result: IDocCategory = {
+		items: [],
+		categories: {},
+		id: `docs-root`,
+	};
+
+	for (const doc of documents) {
+		const nameParts = doc.name.split(`/`);
+
+		if (nameParts.length > 1) {
+			addToDocCategory(result, doc, nameParts, 0);
+		} else {
+			result.items.push(doc);
+		}
+	}
+
+	return result;
+};
+
+const addToDocCategory = (
+	category: IDocCategory,
+	doc: DocumentReflection,
+	nameParts: string[],
+	idx: number,
+): void => {
+	if (idx === nameParts.length - 1) {
+		category.items.push(doc);
+		return;
+	}
+
+	const title = nameParts[idx];
+
+	if (!title) {
+		return;
+	}
+
+	if (!category.categories[title]) {
+		category.categories[title] = {
+			items: [],
+			categories: {},
+			id: `${category.id}-${title}`,
+		};
+	}
+
+	const subCategory = category.categories[title];
+
+	if (!subCategory) {
+		return;
+	}
+
+	addToDocCategory(subCategory, doc, nameParts, idx + 1);
+};
+
+const DocCategoryNavigation = ({
 	id,
 	categories,
 	items,
 	context,
-}: ICategory & {
+}: IDocCategory & {
 	context: DefaultThemeRenderContext;
 }): JSX.Element => (
 	<ul class='js-category-list category' data-id={id}>
@@ -96,16 +159,88 @@ const Navigation = ({
 					<div class='category__folder' data-id={item.id} />
 					{key}
 				</span>
-				<Navigation id={item.id} categories={item.categories} items={item.items} context={context} />
+				<DocCategoryNavigation id={item.id} categories={item.categories} items={item.items} context={context} />
 			</li>
 		))}
-		{items.map(item => (
+		{items.map(doc => (
 			<li>
-				<Item item={item} context={context} />
+				<DocumentItem doc={doc} context={context} />
 			</li>
 		))}
 	</ul>
 );
+
+const DocumentItem = ({
+	doc,
+	context,
+}: {
+	doc: DocumentReflection;
+	context: DefaultThemeRenderContext;
+}): JSX.Element => {
+	const displayName = doc.name.includes(`/`) ? doc.name.split(`/`).pop() || doc.name : doc.name;
+
+	return (
+		<>
+			<a
+				class='category__link js-category-link category__link--doc'
+				href={context.urlTo(doc)}
+				data-id={`/${context.router.getFullUrl(doc)}`}
+			>
+				{displayName}
+			</a>
+			{doc.children && doc.children.length > 0 && (
+				<ul>
+					{doc.children.map(child => (
+						<li>
+							<DocumentItem doc={child} context={context} />
+						</li>
+					))}
+				</ul>
+			)}
+		</>
+	);
+};
+
+const Navigation = ({
+	id,
+	categories,
+	items,
+	documents,
+	context,
+}: ICategory & {
+	documents?: DocumentReflection[];
+	context: DefaultThemeRenderContext;
+}): JSX.Element => {
+	const docTree = documents && documents.length > 0 ? formatDocumentHierarchy(documents) : undefined;
+
+	return (
+		<ul class='js-category-list category' data-id={id}>
+			{docTree && (
+				<li>
+					<span class='js-category-title category__title' data-id='docs-section'>
+						<div class='category__folder' data-id='docs-section' />
+						Documents
+					</span>
+					<DocCategoryNavigation {...docTree} context={context} />
+				</li>
+			)}
+			{Object.entries(categories).map(([key, item]) => (
+				<li>
+					<span class='js-category-title category__title' data-id={item.id}>
+						<div class='category__folder' data-id={item.id} />
+						{key}
+					</span>
+					<Navigation id={item.id} categories={item.categories} items={item.items} context={context} />
+				</li>
+			))}
+			{items.map(item => (
+				<li>
+					<Item item={item} context={context} />
+				</li>
+			))}
+		</ul>
+	);
+};
 
 const Item = ({ item, context }: { item: IItem; context: DefaultThemeRenderContext }): JSX.Element => {
 	if (`id` in item) {

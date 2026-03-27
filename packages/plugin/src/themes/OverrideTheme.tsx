@@ -1,8 +1,11 @@
 import fse from 'fs-extra';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import { DefaultTheme, type PageEvent, type Reflection, type Renderer, RendererEvent } from 'typedoc';
 
 import { OverrideThemeContext } from './OverrideThemeContext.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export class OverrideTheme extends DefaultTheme {
 	public constructor(renderer: Renderer) {
@@ -10,7 +13,7 @@ export class OverrideTheme extends DefaultTheme {
 
 		this.owner.on(RendererEvent.END, event => {
 			fse.copySync(
-				path.join(require.resolve(`typedoc-theme-hierarchy`), `../assets`),
+				path.join(__dirname, `assets`),
 				path.join(event.outputDirectory, `assets`),
 			);
 		});

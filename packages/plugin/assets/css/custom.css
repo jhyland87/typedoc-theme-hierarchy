@@ -140,3 +140,14 @@ a.category__title:hover, a.category__link:hover {
   vertical-align: middle;
   flex-shrink: 0;
 }
+
+.category__link--doc:before {
+  content: "";
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  margin: 0 7px 2px 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23999'%3E%3Cpath d='M4 1h5.586L13 4.414V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zm5 1H4v12h8V5H9V2zM5 8h6v1H5V8zm0 2h6v1H5v-1zm0 2h4v1H5v-1z'/%3E%3C/svg%3E");
+  vertical-align: middle;
+  flex-shrink: 0;
+}
