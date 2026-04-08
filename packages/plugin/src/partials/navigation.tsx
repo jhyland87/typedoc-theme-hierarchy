@@ -242,12 +242,17 @@ const Navigation = ({
 	);
 };
 
+const isAllChildrenDeprecated = (children: DeclarationReflection[]): boolean =>
+	children.length > 0 && children.every(child => child.isDeprecated());
+
 const Item = ({ item, context }: { item: IItem; context: DefaultThemeRenderContext }): JSX.Element => {
 	if (`id` in item) {
+		const fileDeprecated = item.isDeprecated() || isAllChildrenDeprecated(item.children || []);
+
 		return (
 			<>
 				<a
-					class='category__link js-category-link category__link--ts'
+					class={`category__link js-category-link category__link--ts${fileDeprecated ? ` category__link--deprecated` : ``}`}
 					href={context.urlTo(item)}
 					data-id={`/${context.router.getFullUrl(item)}`}
 				>
@@ -257,7 +262,7 @@ const Item = ({ item, context }: { item: IItem; context: DefaultThemeRenderConte
 					{item.children?.map(subItem => (
 						<li>
 							<a
-								class='category__link js-category-link'
+								class={`category__link js-category-link${subItem.isDeprecated() ? ` category__link--deprecated` : ``}`}
 								href={context.urlTo(subItem)}
 								data-id={`/${context.router.getFullUrl(subItem)}`}
 							>
@@ -273,12 +278,12 @@ const Item = ({ item, context }: { item: IItem; context: DefaultThemeRenderConte
 
 	return (
 		<>
-			<span class='category__link category__link--disable js-category-link category__link--ts'>{item.title}</span>
+			<span class={`category__link category__link--disable js-category-link category__link--ts${item.children.length > 0 && item.children.every(child => child.isDeprecated()) ? ` category__link--deprecated` : ``}`}>{item.title}</span>
 			<ul>
 				{item.children.map(subItem => (
 					<li>
 						<a
-							class='category__link js-category-link'
+							class={`category__link js-category-link${subItem.isDeprecated() ? ` category__link--deprecated` : ``}`}
 							href={context.urlTo(subItem)}
 							data-id={`/${context.router.getFullUrl(subItem)}`}
 						>

@@ -153,12 +153,14 @@ var Navigation = ({
   const docTree = documents && documents.length > 0 ? formatDocumentHierarchy(documents) : void 0;
   return /* @__PURE__ */ import_typedoc.JSX.createElement("ul", { class: "js-category-list category", "data-id": id }, docTree && /* @__PURE__ */ import_typedoc.JSX.createElement("li", null, /* @__PURE__ */ import_typedoc.JSX.createElement("span", { class: "js-category-title category__title", "data-id": "docs-root" }, /* @__PURE__ */ import_typedoc.JSX.createElement("div", { class: "category__folder", "data-id": "docs-root" }), "Documents"), /* @__PURE__ */ import_typedoc.JSX.createElement(DocCategoryNavigation, { ...docTree, context })), Object.entries(categories).map(([key, item]) => /* @__PURE__ */ import_typedoc.JSX.createElement("li", null, /* @__PURE__ */ import_typedoc.JSX.createElement("span", { class: "js-category-title category__title", "data-id": item.id }, /* @__PURE__ */ import_typedoc.JSX.createElement("div", { class: "category__folder", "data-id": item.id }), key), /* @__PURE__ */ import_typedoc.JSX.createElement(Navigation, { id: item.id, categories: item.categories, items: item.items, context }))), items.map((item) => /* @__PURE__ */ import_typedoc.JSX.createElement("li", null, /* @__PURE__ */ import_typedoc.JSX.createElement(Item, { item, context }))));
 };
+var isAllChildrenDeprecated = (children) => children.length > 0 && children.every((child) => child.isDeprecated());
 var Item = ({ item, context }) => {
   if (`id` in item) {
+    const fileDeprecated = item.isDeprecated() || isAllChildrenDeprecated(item.children || []);
     return /* @__PURE__ */ import_typedoc.JSX.createElement(import_typedoc.JSX.Fragment, null, /* @__PURE__ */ import_typedoc.JSX.createElement(
       "a",
       {
-        class: "category__link js-category-link category__link--ts",
+        class: `category__link js-category-link category__link--ts${fileDeprecated ? ` category__link--deprecated` : ``}`,
         href: context.urlTo(item),
         "data-id": `/${context.router.getFullUrl(item)}`
       },
@@ -166,7 +168,7 @@ var Item = ({ item, context }) => {
     ), /* @__PURE__ */ import_typedoc.JSX.createElement("ul", null, item.children?.map((subItem) => /* @__PURE__ */ import_typedoc.JSX.createElement("li", null, /* @__PURE__ */ import_typedoc.JSX.createElement(
       "a",
       {
-        class: "category__link js-category-link",
+        class: `category__link js-category-link${subItem.isDeprecated() ? ` category__link--deprecated` : ``}`,
         href: context.urlTo(subItem),
         "data-id": `/${context.router.getFullUrl(subItem)}`
       },
@@ -174,10 +176,10 @@ var Item = ({ item, context }) => {
       subItem.name
     )))));
   }
-  return /* @__PURE__ */ import_typedoc.JSX.createElement(import_typedoc.JSX.Fragment, null, /* @__PURE__ */ import_typedoc.JSX.createElement("span", { class: "category__link category__link--disable js-category-link category__link--ts" }, item.title), /* @__PURE__ */ import_typedoc.JSX.createElement("ul", null, item.children.map((subItem) => /* @__PURE__ */ import_typedoc.JSX.createElement("li", null, /* @__PURE__ */ import_typedoc.JSX.createElement(
+  return /* @__PURE__ */ import_typedoc.JSX.createElement(import_typedoc.JSX.Fragment, null, /* @__PURE__ */ import_typedoc.JSX.createElement("span", { class: `category__link category__link--disable js-category-link category__link--ts${item.children.length > 0 && item.children.every((child) => child.isDeprecated()) ? ` category__link--deprecated` : ``}` }, item.title), /* @__PURE__ */ import_typedoc.JSX.createElement("ul", null, item.children.map((subItem) => /* @__PURE__ */ import_typedoc.JSX.createElement("li", null, /* @__PURE__ */ import_typedoc.JSX.createElement(
     "a",
     {
-      class: "category__link js-category-link",
+      class: `category__link js-category-link${subItem.isDeprecated() ? ` category__link--deprecated` : ``}`,
       href: context.urlTo(subItem),
       "data-id": `/${context.router.getFullUrl(subItem)}`
     },

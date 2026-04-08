@@ -141,6 +141,10 @@ a.category__title:hover, a.category__link:hover {
   flex-shrink: 0;
 }
 
+.category__link--deprecated {
+  text-decoration: line-through;
+}
+
 .category__link--doc:before {
   content: "";
   display: inline-block;
