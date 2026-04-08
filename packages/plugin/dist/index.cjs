@@ -198,7 +198,11 @@ var formatFileHierarchy = (values) => {
     id: `root`
   };
   for (const item of values) {
-    const titleSplit = getName(item).split(`/`);
+    const name = getName(item);
+    if (name.startsWith(`node_modules`)) {
+      continue;
+    }
+    const titleSplit = name.split(`/`);
     addToCategory(result, item, titleSplit, 0);
   }
   return result;

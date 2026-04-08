@@ -308,7 +308,14 @@ const formatFileHierarchy = (values: DeclarationReflection[]): ICategory => {
 	};
 
 	for (const item of values) {
-		const titleSplit = getName(item).split(`/`);
+		const name = getName(item);
+
+		// Skip items resolved from node_modules (e.g. via triple-slash references)
+		if (name.startsWith(`node_modules`)) {
+			continue;
+		}
+
+		const titleSplit = name.split(`/`);
 
 		addToCategory(result, item, titleSplit, 0);
 	}
